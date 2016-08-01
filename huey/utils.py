@@ -1,6 +1,8 @@
 import datetime
 import sys
 import time
+import imp
+import os
 
 
 class EmptyData(object):
@@ -9,9 +11,15 @@ class EmptyData(object):
 
 def load_class(s):
     path, klass = s.rsplit('.', 1)
-    __import__(path)
-    mod = sys.modules[path]
+    if '/' not in path:
+        __import__(path)
+        mod = sys.modules[path]
+    else:
+        # import from anywhere:
+        mod = imp.load_source(os.path.basename(path), '{:s}.py'.format(path))
+
     return getattr(mod, klass)
+
 
 def wrap_exception(new_exc_class):
     exc_class, exc, tb = sys.exc_info()
