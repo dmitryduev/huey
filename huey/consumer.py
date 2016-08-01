@@ -384,6 +384,13 @@ class Consumer(object):
         self.start()
         while True:
             try:
+                # replace a dead process:
+                for i in range(self.workers):
+                    if not self.worker_threads[i].is_alive():
+                        worker = self._create_runnable(self._create_worker())
+                        self.worker_threads[i] = self.environment.create_process(
+                            worker, 'Worker-{:d}'.format(i + 1))
+                        self.worker_threads[i].start()
                 is_set = self.stop_flag.wait(timeout=0.1)
                 time.sleep(0.1)
             except KeyboardInterrupt:
